@@ -1,0 +1,32 @@
+body {
+    background-color: #111827;
+    color: #f9fafb;
+    min-height: 100vh;
+}
+
+.titulo-principal {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.tarjeta-monitor {
+    background-color: #1f2937;
+    color: #ffffff;
+    border: 1px solid #374151;
+    border-radius: 16px;
+}
+
+.json-box {
+    background-color: #020617;
+    color: #22c55e;
+    padding: 20px;
+    border-radius: 12px;
+    min-height: 220px;
+    font-size: 0.95rem;
+    overflow-x: auto;
+    border: 1px solid #334155;
+}
+
+.card-title {
+    color: #e5e7eb;
+}
