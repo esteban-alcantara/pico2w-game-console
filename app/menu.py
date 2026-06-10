@@ -46,6 +46,24 @@ def draw_U(x, y):
     # Base
     tft.fill_rect(x+BLOCK, y+4*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR)
 
+def draw_S(x, y):
+    tft.fill_rect(x, y, BLOCK*3, BLOCK, LETTER_COLOR)          # top
+    tft.fill_rect(x, y+BLOCK, BLOCK, BLOCK, LETTER_COLOR)      # izquierda medio
+    tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # medio horizontal
+    tft.fill_rect(x+2*BLOCK, y+3*BLOCK, BLOCK, BLOCK, LETTER_COLOR) # derecha medio
+    tft.fill_rect(x, y+4*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR)  # bottom
+
+def draw_A(x, y):
+    tft.fill_rect(x, y+BLOCK, BLOCK, BLOCK*4, LETTER_COLOR)        # izquierda
+    tft.fill_rect(x+BLOCK*4, y+BLOCK, BLOCK, BLOCK*4, LETTER_COLOR) # derecha
+    tft.fill_rect(x+BLOCK, y, BLOCK*3, BLOCK, LETTER_COLOR)        # barra superior
+    tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR) # barra horizontal central
+
+def draw_K(x, y):
+    tft.fill_rect(x, y, BLOCK, BLOCK*5, LETTER_COLOR)  # vertical
+    tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # barra diagonal superior
+    tft.fill_rect(x+BLOCK, y+3*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # barra diagonal inferior
+
 def draw_menu_text():
     TITLE_X = 40
     TITLE_Y = 50
@@ -64,14 +82,23 @@ def draw_menu_text():
     x += BLOCK*5 + LETTER_SPACING
     draw_U(x, y)
 
-
+def draw_snake_text(x, y):
+    draw_S(x, y)
+    x += BLOCK*5 + GAP
+    draw_N(x, y)
+    x += BLOCK*5 + GAP
+    draw_A(x, y)
+    x += BLOCK*5 + GAP
+    draw_K(x, y)
+    x += BLOCK*5 + GAP
+    draw_E(x, y)
 
 def draw_menu_title():
     # Rectángulo base para el título
     TITLE_X = 40
     TITLE_Y = 50
     TITLE_W = 160
-    TITLE_H = 30
+    TITLE_H = 45
     TITLE_COLOR = 0x07FF  # cian brillante
 
     tft.fill_rect(TITLE_X, TITLE_Y, TITLE_W, TITLE_H, TITLE_COLOR)
@@ -85,9 +112,11 @@ def draw_main_menu(selected):
 
     # Opciones
     for i, game in enumerate(MENU_GAMES):
-        y = 130 + i*35
+        y = 130 + i*(25+10)
         if i == selected:
-            tft.fill_rect(40, y-5, 160, 25, 0x001F)
+            tft.fill_rect(40, y, 160, 25, 0x001F)  # bloque azul de selección
+            if i == 0:  # SNAKE
+                draw_snake_text(50, y+2)  # dibuja letras dentro del bloque
 
 def main_menu():
     selected = 0
