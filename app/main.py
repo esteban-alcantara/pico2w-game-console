@@ -6,6 +6,7 @@ import wifi_server
 from hardware import update_brightness, clear_screen
 import menu
 import snake_game
+import blocks_game
 # import dodge_game  
 
 # NÚCLEO 1: servidor WiFi (corre en segundo núcleo)
@@ -34,7 +35,9 @@ def main():
 
         if selected == 0:
             snake_game.run()
-        # elif selected == 1:
+        elif selected == 1:
+            blocks_game.run()
+        # elif selected == 2:   
         #     dodge_game.run()
 
         clear_screen()
