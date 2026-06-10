@@ -4,7 +4,7 @@ from hardware import menu_sound, select_sound
 from hardware import btn_right
 import time
 
-MENU_GAMES = ["SNAKE", "DODGE GAME"]
+MENU_GAMES = ["SNAKE", "BLOCKS"]
 
 # Tamaño del "pixel" de la letra
 BLOCK = 6
@@ -59,10 +59,42 @@ def draw_A(x, y):
     tft.fill_rect(x+BLOCK, y, BLOCK*3, BLOCK, LETTER_COLOR)        # barra superior
     tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR) # barra horizontal central
 
-def draw_K(x, y):
-    tft.fill_rect(x, y, BLOCK, BLOCK*5, LETTER_COLOR)  # vertical
-    tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # barra diagonal superior
-    tft.fill_rect(x+BLOCK, y+3*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # barra diagonal inferior
+def draw_K(x, y, scale=1):
+    S = int(BLOCK*scale)
+    # Vertical izquierda
+    tft.fill_rect(x, y, S, S*5, LETTER_COLOR)
+    # Diagonal superior
+    tft.fill_rect(x+S, y+S, S*2, S, LETTER_COLOR)
+    tft.fill_rect(x+S, y+2*S, S, S, LETTER_COLOR)
+    # Diagonal inferior
+    tft.fill_rect(x+S, y+3*S, S, S, LETTER_COLOR)
+    tft.fill_rect(x+S, y+4*S, S*2, S, LETTER_COLOR)
+
+def draw_B(x, y):
+    # vertical izquierda
+    tft.fill_rect(x, y, BLOCK, BLOCK*5, LETTER_COLOR)
+    # dos curvas horizontales
+    tft.fill_rect(x+BLOCK, y, BLOCK*2, BLOCK, LETTER_COLOR)      # top
+    tft.fill_rect(x+BLOCK, y+2*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # medio
+    tft.fill_rect(x+BLOCK, y+4*BLOCK, BLOCK*2, BLOCK, LETTER_COLOR) # bottom
+    # vertical derecha curvas
+    tft.fill_rect(x+3*BLOCK, y+BLOCK, BLOCK, BLOCK, LETTER_COLOR)
+    tft.fill_rect(x+3*BLOCK, y+3*BLOCK, BLOCK, BLOCK, LETTER_COLOR)
+
+def draw_L(x, y):
+    tft.fill_rect(x, y, BLOCK, BLOCK*5, LETTER_COLOR)      # vertical
+    tft.fill_rect(x, y+4*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR) # base horizontal
+
+def draw_O(x, y):
+    tft.fill_rect(x, y, BLOCK, BLOCK*5, LETTER_COLOR)         # izquierda
+    tft.fill_rect(x+4*BLOCK, y, BLOCK, BLOCK*5, LETTER_COLOR) # derecha
+    tft.fill_rect(x+BLOCK, y, BLOCK*3, BLOCK, LETTER_COLOR)   # top
+    tft.fill_rect(x+BLOCK, y+4*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR) # bottom
+
+def draw_C(x, y):
+    tft.fill_rect(x+BLOCK, y, BLOCK*3, BLOCK, LETTER_COLOR)     # top
+    tft.fill_rect(x, y+BLOCK, BLOCK, BLOCK*3, LETTER_COLOR)     # vertical
+    tft.fill_rect(x+BLOCK, y+4*BLOCK, BLOCK*3, BLOCK, LETTER_COLOR) # bottom
 
 def draw_menu_text():
     TITLE_X = 40
@@ -93,6 +125,19 @@ def draw_snake_text(x, y):
     x += BLOCK*5 + GAP
     draw_E(x, y)
 
+def draw_blocks_text(x, y):
+    draw_B(x, y)
+    x += BLOCK*5 + GAP
+    draw_L(x, y)
+    x += BLOCK*5 + GAP
+    draw_O(x, y)
+    x += BLOCK*5 + GAP
+    draw_C(x, y)
+    x += BLOCK*5 + GAP
+    draw_K(x, y)
+    x += BLOCK*5 + GAP
+    draw_S(x, y)
+
 def draw_menu_title():
     # Rectángulo base para el título
     TITLE_X = 40
@@ -114,9 +159,11 @@ def draw_main_menu(selected):
     for i, game in enumerate(MENU_GAMES):
         y = 130 + i*(25+10)
         if i == selected:
-            tft.fill_rect(40, y, 160, 25, 0x001F)  # bloque azul de selección
+            tft.fill_rect(40, y, 160, 35, 0x001F)  # bloque azul de selección
             if i == 0:  # SNAKE
                 draw_snake_text(50, y+2)  # dibuja letras dentro del bloque
+            elif i == 1:  # BLOCKS
+                draw_blocks_text(50, y+2)
 
 def main_menu():
     selected = 0
