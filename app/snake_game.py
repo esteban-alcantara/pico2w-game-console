@@ -1,11 +1,10 @@
 # snake_game.py
 import random
 import time
+import hardware
 from hardware import tft, update_brightness, wait_any_button
 from hardware import read_direction, GREEN, DARK_GREEN, RED, WHITE, BLUE
-from hardware import speed_ms, gameover_sound, eat_sound, turn_sound, start_sound
-from hardware import menu_pressed_flag
-
+from hardware import gameover_sound, eat_sound, turn_sound, start_sound
 
 CELL = 10
 HUD_H = 20
@@ -68,9 +67,8 @@ def run():
     wait_any_button()
     start_sound()
 
-    global speed_ms
     score = 0
-    speed_ms = 140
+    hardware.speed_ms = 140
 
     head = (GRID_W//2, GRID_H//2)
     snake = [head, (head[0]-1, head[1]), (head[0]-2, head[1])]
@@ -86,20 +84,19 @@ def run():
     tft.rect(0, HUD_H, W, H-HUD_H, WHITE)
 
     for i, segment in enumerate(snake):
-        draw_cell(segment, GREEN if i==0 else DARK_GREEN)
+        draw_cell(segment, GREEN if i == 0 else DARK_GREEN)
     draw_cell(food, RED)
 
     last_step = time.ticks_ms()
 
     while True:
-        
-        
         update_brightness()
-        
-        if menu_pressed_flag:
-            menu_pressed_flag = False
+
+        # Verificar botón menú via flag de hardware
+        if hardware.menu_pressed_flag:
+            hardware.menu_pressed_flag = False
             return
-        
+
         ndx, ndy = read_direction()
         if ndx != 0 or ndy != 0:
             if not (ndx == -dx and ndy == -dy):
@@ -108,7 +105,7 @@ def run():
                 pending_dx, pending_dy = ndx, ndy
 
         now = time.ticks_ms()
-        if time.ticks_diff(now, last_step) < speed_ms:
+        if time.ticks_diff(now, last_step) < hardware.speed_ms:
             time.sleep_ms(5)
             continue
         last_step = now
@@ -117,16 +114,16 @@ def run():
         hx, hy = snake[0]
         new_head = (hx+dx, hy+dy)
 
-        if new_head[0]<0 or new_head[0]>=GRID_W or new_head[1]<0 or new_head[1]>=GRID_H:
+        if new_head[0] < 0 or new_head[0] >= GRID_W or new_head[1] < 0 or new_head[1] >= GRID_H:
             gameover_sound()
             draw_gameover_screen()
             wait_any_button()
             return
 
         tail = snake[-1]
-        eating = new_head==food
+        eating = new_head == food
 
-        if new_head in snake_set and not (new_head==tail and not eating):
+        if new_head in snake_set and not (new_head == tail and not eating):
             gameover_sound()
             draw_gameover_screen()
             wait_any_button()
@@ -135,14 +132,14 @@ def run():
         snake.insert(0, new_head)
         snake_set.add(new_head)
         draw_cell(new_head, GREEN)
-        if len(snake)>1:
+        if len(snake) > 1:
             draw_cell(snake[1], DARK_GREEN)
 
         if eating:
             eat_sound()
             score += 1
-            if score%3==0 and speed_ms>60:
-                speed_ms -= 10
+            if score % 3 == 0 and hardware.speed_ms > 60:
+                hardware.speed_ms -= 10
             draw_hud(score)
             food = spawn_food(snake_set)
             draw_cell(food, RED)

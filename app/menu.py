@@ -1,5 +1,7 @@
 from hardware import tft, update_brightness, pressed, wait_any_button
+from hardware import btn_up, btn_down
 from hardware import menu_sound, select_sound
+from hardware import btn_right
 import time
 
 MENU_GAMES = ["SNAKE", "DODGE GAME"]
@@ -13,7 +15,6 @@ def draw_main_menu(selected):
         y = 130 + i*35
         if i == selected:
             tft.fill_rect(40, y-5, 160, 25, 0x001F)
-        # Opcional: dibujar bloques decorativos según juego
 
 def main_menu():
     selected = 0
@@ -25,12 +26,12 @@ def main_menu():
         now = time.ticks_ms()
         if time.ticks_diff(now, last_move) > 220:
             if pressed(btn_up):
-                selected = (selected -1) % len(MENU_GAMES)
+                selected = (selected - 1) % len(MENU_GAMES)
                 menu_sound()
                 draw_main_menu(selected)
                 last_move = now
             elif pressed(btn_down):
-                selected = (selected +1) % len(MENU_GAMES)
+                selected = (selected + 1) % len(MENU_GAMES)
                 menu_sound()
                 draw_main_menu(selected)
                 last_move = now

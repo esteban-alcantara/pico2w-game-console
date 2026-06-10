@@ -48,6 +48,22 @@ def update_brightness():
     backlight_pwm.duty_u16(duty)
 
 # =================================================
+# COLORES
+# =================================================
+BLACK      = 0x0000
+WHITE      = 0xFFFF
+RED        = 0xF800
+GREEN      = 0x07E0
+DARK_GREEN = 0x03E0
+BLUE       = 0x001F
+YELLOW     = 0xFFE0
+
+# =================================================
+# VELOCIDAD (compartida con juegos)
+# =================================================
+speed_ms = 140
+
+# =================================================
 # BOTONES
 # =================================================
 btn_up = Pin(PIN_UP, Pin.IN, Pin.PULL_UP)
@@ -83,7 +99,7 @@ def read_direction():
         return 1, 0
     return 0, 0
 
-# Bandera global que indica si se presionó
+# Bandera global que indica si se presionó el botón menú
 menu_pressed_flag = False
 
 # Función de interrupción
@@ -93,6 +109,12 @@ def menu_isr(pin):
 
 # Configurar interrupción para flanco descendente (cuando se presiona)
 btn_menu.irq(trigger=Pin.IRQ_FALLING, handler=menu_isr)
+
+# =================================================
+# PANTALLA
+# =================================================
+def clear_screen():
+    tft.fill(0)
 
 # =================================================
 # BUZZER
