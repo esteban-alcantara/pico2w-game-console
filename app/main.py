@@ -37,8 +37,6 @@ def main():
             snake_game.run()
         elif selected == 1:
             blocks_game.run()
-        # elif selected == 2:   
-        #     dodge_game.run()
 
         clear_screen()
         time.sleep_ms(500)
