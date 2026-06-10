@@ -4,6 +4,8 @@ import time
 from hardware import tft, update_brightness, wait_any_button
 from hardware import read_direction, GREEN, DARK_GREEN, RED, WHITE, BLUE
 from hardware import speed_ms, gameover_sound, eat_sound, turn_sound, start_sound
+from hardware import menu_pressed_flag
+
 
 CELL = 10
 HUD_H = 20
@@ -90,7 +92,14 @@ def run():
     last_step = time.ticks_ms()
 
     while True:
+        
+        
         update_brightness()
+        
+        if menu_pressed_flag:
+            menu_pressed_flag = False
+            return
+        
         ndx, ndy = read_direction()
         if ndx != 0 or ndy != 0:
             if not (ndx == -dx and ndy == -dy):

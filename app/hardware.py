@@ -18,6 +18,7 @@ PIN_DOWN = 19
 PIN_LEFT = 20
 PIN_RIGHT = 21
 PIN_BUZZER = 14
+PIN_MENU = 16
 
 # =================================================
 # DISPLAY
@@ -53,6 +54,7 @@ btn_up = Pin(PIN_UP, Pin.IN, Pin.PULL_UP)
 btn_down = Pin(PIN_DOWN, Pin.IN, Pin.PULL_UP)
 btn_left = Pin(PIN_LEFT, Pin.IN, Pin.PULL_UP)
 btn_right = Pin(PIN_RIGHT, Pin.IN, Pin.PULL_UP)
+btn_menu = Pin(PIN_MENU, Pin.IN, Pin.PULL_UP)
 
 def pressed(button):
     return button.value() == 0
@@ -80,6 +82,17 @@ def read_direction():
     if pressed(btn_right):
         return 1, 0
     return 0, 0
+
+# Bandera global que indica si se presionó
+menu_pressed_flag = False
+
+# Función de interrupción
+def menu_isr(pin):
+    global menu_pressed_flag
+    menu_pressed_flag = True
+
+# Configurar interrupción para flanco descendente (cuando se presiona)
+btn_menu.irq(trigger=Pin.IRQ_FALLING, handler=menu_isr)
 
 # =================================================
 # BUZZER
