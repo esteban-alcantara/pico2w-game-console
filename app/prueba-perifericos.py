@@ -2,7 +2,7 @@ from machine import Pin, SPI, PWM
 import time
 import st7789py as st7789
 
-# Pines del display con tu conexión actual
+# Pines del display 
 PIN_SCK = 2
 PIN_MOSI = 3
 PIN_RESET = 7
@@ -48,7 +48,7 @@ spi = SPI(
     mosi=Pin(PIN_MOSI)
 )
 
-# Inicialización del display ST7789 240x240 sin CS
+# Inicialización del display ST7789 240x240 
 tft = st7789.ST7789(
     spi,
     240,
@@ -64,9 +64,6 @@ tft = st7789.ST7789(
 tft.fill(st7789.BLACK)
 
 while True:
-    # Recuerda:
-    # Con PULL_UP, el botón presionado lee 0
-    # El botón sin presionar lee 1
 
     if btn_up.value() == 0:
         tft.fill(st7789.BLUE)
@@ -93,6 +90,6 @@ while True:
         time.sleep_ms(200)
 
     else:
-        # No hace nada cuando no presionas botones
+        # No hace nada cuando no se presionan botones
         buzzer.duty_u16(0)
         time.sleep_ms(20)
