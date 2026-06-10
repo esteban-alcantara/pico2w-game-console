@@ -1,114 +1,46 @@
-import network
-import socket
+import _thread
+import uasyncio as asyncio
 import time
-import json
+import shared_state
+import wifi_server
+from hardware import update_brightness, clear_screen
+import menu
+import snake_game
+import blocks_game
+# import dodge_game  
 
-# =========================
-# CONFIGURACIÓN WIFI
-# =========================
-SSID = "INFINITUMD942"
-PASSWORD = "89943675Ap"
+# NÚCLEO 1: servidor WiFi (corre en segundo núcleo)
+def wifi_core():
+    """Corre el event loop de asyncio con el servidor HTTP en el núcleo 1."""
+    async def _server():
+        server = await asyncio.start_server(wifi_server._handle_client, "0.0.0.0", 80)
+        print("Servidor HTTP listo en puerto 80")
+        while True:
+            await asyncio.sleep(1)
+    asyncio.run(_server())
 
-contador = 0
+# NÚCLEO 0: juego (loop principal)
+def main():
+    shared_state.uptime_start = time.time()
 
+    wifi_server.conectar_wifi()
 
-def conectar_wifi():
-    wlan = network.WLAN(network.STA_IF)
-    wlan.active(True)
+    _thread.start_new_thread(wifi_core, ())
+    time.sleep(1)  # Se le da tiempo al servidor para iniciar
 
-    if not wlan.isconnected():
-        print("Conectando al WiFi...")
-        wlan.connect(SSID, PASSWORD)
-
-        tiempo_inicio = time.time()
-
-        while not wlan.isconnected():
-            if time.time() - tiempo_inicio > 20:
-                print("No se pudo conectar al WiFi")
-                return None
-
-            print("Esperando conexión...")
-            time.sleep(1)
-
-    ip = wlan.ifconfig()[0]
-    print("Conectado correctamente")
-    print("IP de la Pico 2W:", ip)
-
-    return ip
-
-
-def crear_json_prueba():
-    global contador
-
-    contador += 1
-
-    datos = {
-        "dispositivo": "Raspberry Pi Pico 2W",
-        "proyecto": "Consola ST7789",
-        "juego": "Prueba JSON",
-        "jugador": "Esteban",
-        "puntaje": contador * 100,
-        "estado": "activo",
-        "contador_envios": contador,
-        "timestamp": time.time()
-    }
-
-    return datos
-
-
-def iniciar_servidor():
-    addr = socket.getaddrinfo("0.0.0.0", 80)[0][-1]
-
-    servidor = socket.socket()
-    servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    servidor.bind(addr)
-    servidor.listen(1)
-
-    print("Servidor HTTP iniciado en puerto 80")
-    print("Ruta JSON: /datos")
-
+    # Loop del juego en el núcleo principal
     while True:
-        cliente, direccion = servidor.accept()
-        print("Cliente conectado desde:", direccion)
+        update_brightness()
+        selected = menu.main_menu()
 
-        request = cliente.recv(1024).decode("utf-8")
-        print("Petición recibida:")
-        print(request)
+        if selected == 0:
+            snake_game.run()
+        elif selected == 1:
+            blocks_game.run()
+        # elif selected == 2:   
+        #     dodge_game.run()
 
-        if "GET /datos" in request:
-            datos = crear_json_prueba()
-            cuerpo = json.dumps(datos)
+        clear_screen()
+        time.sleep_ms(500)
 
-            respuesta = (
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: application/json\r\n"
-                "Access-Control-Allow-Origin: *\r\n"
-                "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n"
-                "Access-Control-Allow-Headers: Content-Type\r\n"
-                "Connection: close\r\n"
-                "\r\n"
-                + cuerpo
-            )
-
-        else:
-            cuerpo = "Servidor Pico 2W funcionando. Usa /datos para obtener JSON."
-
-            respuesta = (
-                "HTTP/1.1 200 OK\r\n"
-                "Content-Type: text/plain\r\n"
-                "Access-Control-Allow-Origin: *\r\n"
-                "Connection: close\r\n"
-                "\r\n"
-                + cuerpo
-            )
-
-        cliente.send(respuesta.encode("utf-8"))
-        cliente.close()
-
-
-ip = conectar_wifi()
-
-if ip:
-    iniciar_servidor()
-else:
-    print("No se inició el servidor porque no hubo conexión WiFi.")
+main()
