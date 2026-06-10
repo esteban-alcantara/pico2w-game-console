@@ -23,7 +23,7 @@ BLACK = 0x0000
 YELLOW = 0xFFE0
 PURPLE = 0xF81F
 
-# HUD (puntaje y vidas)
+# Puntaje y vidas
 def draw_hud(score, lives):
     tft.fill_rect(0, 0, W, 20, BLACK)
     tft.fill_rect(0, 0, W, 3, PURPLE)
@@ -45,7 +45,7 @@ def draw_start_screen():
     tft.fill_rect(70, 70, OBSTACLE_SIZE, OBSTACLE_SIZE, RED)
     tft.fill_rect(150, 100, OBSTACLE_SIZE, OBSTACLE_SIZE, RED)
     tft.fill_rect(115, 50, OBSTACLE_SIZE, OBSTACLE_SIZE, RED)
-    # texto con bloques (solo impresión por consola)
+    # texto con bloques 
     print("BLOCKS")
     print("LEFT/RIGHT: mover")
     print("Evita los bloques rojos")
