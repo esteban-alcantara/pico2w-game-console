@@ -1,5 +1,5 @@
 // Cambia esta IP por la IP real de tu Raspberry Pi Pico 2W
-const IP_PICO = "192.168.1.92";
+const IP_PICO = "192.168.1.94";
 const URL_JSON = `http://${IP_PICO}/datos`;
 
 // Elementos del HTML

@@ -12,10 +12,6 @@ PIN_DC = 6
 PIN_BLK = 8
 
 # PIN DEL POTENCIÓMETRO PARA BRILLO
-# Potenciómetro:
-# 3V3  -> extremo
-# GND  -> extremo
-# GP26 -> pin central
 
 PIN_POT = 26
 
