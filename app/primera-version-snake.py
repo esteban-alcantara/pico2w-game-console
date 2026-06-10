@@ -1,8 +1,7 @@
-from machine import Pin, SPI, PWM
+from machine import Pin, SPI, PWM, ADC
 import time
 import random
 import st7789py as st7789
-
 
 # PINES DEL DISPLAY ST7789
 
@@ -12,20 +11,26 @@ PIN_RESET = 7
 PIN_DC = 6
 PIN_BLK = 8
 
+# PIN DEL POTENCIÓMETRO PARA BRILLO
+# Potenciómetro:
+# 3V3  -> extremo
+# GND  -> extremo
+# GP26 -> pin central
+
+PIN_POT = 26
+
 # PINES DE BOTONES
 
-PIN_UP = 10
-PIN_DOWN = 11
-PIN_LEFT = 12
-PIN_RIGHT = 13
+PIN_UP = 18
+PIN_DOWN = 19
+PIN_LEFT = 20
+PIN_RIGHT = 21
 
 # PIN DEL BUZZER
 
 PIN_BUZZER = 14
 
 # BOTONES CON PULL-UP INTERNO
-# Sin presionar = 1
-# Presionado = 0
 
 btn_up = Pin(PIN_UP, Pin.IN, Pin.PULL_UP)
 btn_down = Pin(PIN_DOWN, Pin.IN, Pin.PULL_UP)
@@ -65,8 +70,9 @@ def gameover_sound():
 
 # DISPLAY
 
-backlight = Pin(PIN_BLK, Pin.OUT)
-backlight.value(1)
+# Primero se crea como Pin normal para que el driver pueda inicializarlo
+backlight_pin = Pin(PIN_BLK, Pin.OUT)
+backlight_pin.value(1)
 
 spi = SPI(
     0,
@@ -84,9 +90,29 @@ tft = st7789.ST7789(
     reset=Pin(PIN_RESET, Pin.OUT),
     dc=Pin(PIN_DC, Pin.OUT),
     cs=None,
-    backlight=backlight,
+    backlight=backlight_pin,
     rotation=1
 )
+
+# Ahora el mismo pin BLK se usa con PWM
+backlight_pwm = PWM(backlight_pin)
+backlight_pwm.freq(1000)
+
+# ADC del potenciómetro
+pot = ADC(Pin(PIN_POT))
+
+# Brillo mínimo y máximo
+BRIGHTNESS_MIN = 3000
+BRIGHTNESS_MAX = 65535
+
+def update_brightness():
+    raw = pot.read_u16()
+
+    duty = BRIGHTNESS_MIN + int(
+        raw * (BRIGHTNESS_MAX - BRIGHTNESS_MIN) / 65535
+    )
+
+    backlight_pwm.duty_u16(duty)
 
 W = 240
 H = 240
@@ -116,7 +142,6 @@ PLAY_H = H - HUD_H
 GRID_W = PLAY_W // CELL
 GRID_H = PLAY_H // CELL
 
-# Velocidad inicial
 speed_ms = 140
 
 # FUNCIONES DE BOTONES
@@ -134,11 +159,13 @@ def any_button_pressed():
 
 def wait_any_button():
     while not any_button_pressed():
+        update_brightness()
         time.sleep_ms(10)
 
     time.sleep_ms(180)
 
     while any_button_pressed():
+        update_brightness()
         time.sleep_ms(10)
 
     time.sleep_ms(180)
@@ -158,7 +185,9 @@ def read_direction():
 
     return 0, 0
 
+# =================================================
 # FUNCIONES DE DIBUJO
+# =================================================
 
 def clear_screen(color=BLACK):
     tft.fill(color)
@@ -170,12 +199,8 @@ def draw_cell(cell, color):
 
 def draw_hud(score):
     tft.fill_rect(0, 0, W, HUD_H, BLACK)
-
-    # Barra azul decorativa
     tft.fill_rect(0, 0, W, 3, BLUE)
 
-    # Score representado con cuadritos amarillos
-    # Cada comida agrega un cuadrito hasta que se llene la parte superior
     max_blocks = W // 8
 
     blocks = score
@@ -189,33 +214,28 @@ def draw_hud(score):
 def draw_start_screen():
     clear_screen(BLACK)
 
-    # Marco
     tft.rect(20, 20, 200, 200, BLUE)
 
-    # Dibujito de serpiente
     tft.fill_rect(70, 90, 20, 20, GREEN)
     tft.fill_rect(90, 90, 20, 20, DARK_GREEN)
     tft.fill_rect(110, 90, 20, 20, DARK_GREEN)
     tft.fill_rect(130, 90, 20, 20, DARK_GREEN)
 
-    # Comida
     tft.fill_rect(160, 90, 20, 20, RED)
 
-    # Botones simulados
     tft.fill_rect(95, 145, 50, 12, WHITE)
     tft.fill_rect(80, 165, 80, 12, YELLOW)
 
     print("PICO SNAKE")
+    print("Mueve el potenciometro para cambiar el brillo")
     print("Presiona cualquier boton para iniciar")
 
 def draw_gameover_screen():
     clear_screen(BLACK)
 
-    # Pantalla roja tipo game over
     tft.rect(30, 40, 180, 160, RED)
     tft.fill_rect(60, 80, 120, 40, RED)
 
-    # Carita simple
     tft.fill_rect(85, 145, 15, 15, WHITE)
     tft.fill_rect(140, 145, 15, 15, WHITE)
     tft.fill_rect(95, 175, 50, 8, WHITE)
@@ -232,6 +252,7 @@ def spawn_food(snake_set):
 
         if food not in snake_set:
             return food
+
 
 # JUEGO
 
@@ -262,7 +283,6 @@ def game():
     clear_screen(BLACK)
     draw_hud(score)
 
-    # Borde del área de juego
     tft.rect(0, HUD_H, W, H - HUD_H, WHITE)
 
     for i, segment in enumerate(snake):
@@ -276,11 +296,12 @@ def game():
     last_step = time.ticks_ms()
 
     while True:
-        # Leer botones
+        # Actualizar brillo constantemente
+        update_brightness()
+
         ndx, ndy = read_direction()
 
         if ndx != 0 or ndy != 0:
-            # Evita reversa directa
             if not (ndx == -dx and ndy == -dy):
                 if (ndx, ndy) != (pending_dx, pending_dy):
                     turn_sound()
@@ -302,7 +323,6 @@ def game():
         hx, hy = snake[0]
         new_head = (hx + dx, hy + dy)
 
-        # Colisión con pared
         if (
             new_head[0] < 0 or
             new_head[0] >= GRID_W or
@@ -317,21 +337,17 @@ def game():
         tail = snake[-1]
         eating = new_head == food
 
-        # Colisión con la propia serpiente
         if new_head in snake_set and not (new_head == tail and not eating):
             gameover_sound()
             draw_gameover_screen()
             wait_any_button()
             return
 
-        # Agregar nueva cabeza
         snake.insert(0, new_head)
         snake_set.add(new_head)
 
-        # Dibujar nueva cabeza
         draw_cell(new_head, GREEN)
 
-        # Convertir cabeza anterior a cuerpo
         if len(snake) > 1:
             draw_cell(snake[1], DARK_GREEN)
 
@@ -340,7 +356,6 @@ def game():
 
             score += 1
 
-            # Aumentar dificultad cada 3 comidas
             if score % 3 == 0 and speed_ms > 60:
                 speed_ms -= 10
 
@@ -350,16 +365,14 @@ def game():
             draw_cell(food, RED)
 
         else:
-            # Borrar cola
             removed_tail = snake.pop()
             snake_set.remove(removed_tail)
             draw_cell(removed_tail, BLACK)
 
-
 # LOOP PRINCIPAL
 
 while True:
-    backlight.value(1)
+    update_brightness()
 
     draw_start_screen()
     wait_any_button()
