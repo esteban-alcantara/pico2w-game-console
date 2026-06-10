@@ -1,4 +1,3 @@
-// Cambia esta IP por la IP real de tu Raspberry Pi Pico 2W
 const IP_PICO = "192.168.1.94";
 const URL_JSON = `http://${IP_PICO}/datos`;
 
@@ -41,7 +40,7 @@ async function obtenerJsonDePico() {
 // Botón para actualizar manualmente
 btnActualizar.addEventListener("click", obtenerJsonDePico);
 
-// Primera lectura inmediata
+
 obtenerJsonDePico();
 
 // Consulta automática cada 5 segundos
