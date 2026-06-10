@@ -6,7 +6,7 @@ import time
 
 MENU_GAMES = ["SNAKE", "BLOCKS"]
 
-# Tamaño del "pixel" de la letra
+# Tamaño del pixel de la letra
 BLOCK = 6
 GAP = 1  # espacio entre rectángulos
 LETTER_SPACING = 4
@@ -144,7 +144,7 @@ def draw_menu_title():
     TITLE_Y = 50
     TITLE_W = 160
     TITLE_H = 45
-    TITLE_COLOR = 0x07FF  # cian brillante
+    TITLE_COLOR = 0x07FF  # cian 
 
     tft.fill_rect(TITLE_X, TITLE_Y, TITLE_W, TITLE_H, TITLE_COLOR)
 
@@ -153,7 +153,7 @@ def draw_main_menu(selected):
     tft.rect(10, 10, 220, 220, 0x001F)  # Marco azul
     
     draw_menu_title()
-    draw_menu_text()   # letras blancas "MENU"
+    draw_menu_text()   
 
     # Opciones
     for i, game in enumerate(MENU_GAMES):
@@ -161,7 +161,7 @@ def draw_main_menu(selected):
         if i == selected:
             tft.fill_rect(40, y, 160, 35, 0x001F)  # bloque azul de selección
             if i == 0:  # SNAKE
-                draw_snake_text(50, y+2)  # dibuja letras dentro del bloque
+                draw_snake_text(50, y+2)  
             elif i == 1:  # BLOCKS
                 draw_blocks_text(50, y+2)
 
