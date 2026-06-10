@@ -1,7 +1,7 @@
-# snake_game.py
 import random
 import time
 import hardware
+import shared_state
 from hardware import tft, update_brightness, wait_any_button
 from hardware import read_direction, GREEN, DARK_GREEN, RED, WHITE, BLUE
 from hardware import gameover_sound, eat_sound, turn_sound, start_sound
@@ -18,12 +18,12 @@ GRID_W = PLAY_W // CELL
 GRID_H = PLAY_H // CELL
 
 def draw_hud(score):
-    tft.fill_rect(0, 0, W, HUD_H, 0)  # negro
+    tft.fill_rect(0, 0, W, HUD_H, 0)
     tft.fill_rect(0, 0, W, 3, BLUE)
     max_blocks = W // 8
     blocks = min(score, max_blocks)
     for i in range(blocks):
-        tft.fill_rect(i*8, 7, 6, 8, 0xFFE0)  # amarillo
+        tft.fill_rect(i*8, 7, 6, 8, 0xFFE0)
 
 def draw_snake_start_screen():
     tft.fill(0)
@@ -49,20 +49,22 @@ def spawn_food(snake_set):
         if food not in snake_set:
             return food
 
-def draw_gameover_screen():
+def draw_gameover_screen(score):
     tft.fill(0)
     tft.rect(30, 40, 180, 160, RED)
     tft.fill_rect(60, 80, 120, 40, RED)
     tft.fill_rect(85, 145, 15, 15, WHITE)
     tft.fill_rect(140, 145, 15, 15, WHITE)
     tft.fill_rect(95, 175, 50, 8, WHITE)
-    print("GAME OVER")
+    print("GAME OVER  Score:", score)
     print("Presiona cualquier boton para volver al menu")
 
 # =========================
 # FUNCION PRINCIPAL
 # =========================
 def run():
+    shared_state.current_game = "snake"
+
     draw_snake_start_screen()
     wait_any_button()
     start_sound()
@@ -92,9 +94,10 @@ def run():
     while True:
         update_brightness()
 
-        # Verificar botón menú via flag de hardware
         if hardware.menu_pressed_flag:
             hardware.menu_pressed_flag = False
+            shared_state.last_score = score
+            shared_state.current_game = "none"
             return
 
         ndx, ndy = read_direction()
@@ -116,7 +119,9 @@ def run():
 
         if new_head[0] < 0 or new_head[0] >= GRID_W or new_head[1] < 0 or new_head[1] >= GRID_H:
             gameover_sound()
-            draw_gameover_screen()
+            shared_state.last_score = score
+            shared_state.current_game = "none"
+            draw_gameover_screen(score)
             wait_any_button()
             return
 
@@ -125,7 +130,9 @@ def run():
 
         if new_head in snake_set and not (new_head == tail and not eating):
             gameover_sound()
-            draw_gameover_screen()
+            shared_state.last_score = score
+            shared_state.current_game = "none"
+            draw_gameover_screen(score)
             wait_any_button()
             return
 
@@ -146,4 +153,4 @@ def run():
         else:
             removed_tail = snake.pop()
             snake_set.remove(removed_tail)
-            draw_cell(removed_tail, 0)  # negro
+            draw_cell(removed_tail, 0)
